@@ -28,6 +28,9 @@ class Neural_Network:
         exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
         return exp_x / np.sum(exp_x, axis=1, keepdims=True)
     
+    def square_error(self, y_actual, y_predicted):
+        return np.mean((y_actual - y_predicted) ** 2)
+    
     # Feed forward pass input to a network output
     def forward_pass(self, inputs):
         # HIDDEN LAYER --------------------------
@@ -48,23 +51,26 @@ class Neural_Network:
             temp_output.append(weighted_sum)  
         softmax_out = self.softmax(np.array(temp_output))
         output_layer_outputs.append(softmax_out)
+
         return hidden_layer_outputs, output_layer_outputs
 
     # Backpropagate error and store in neurons
     def backward_propagate_error(self, inputs, hidden_layer_outputs, output_layer_outputs, desired_outputs):
-
+        
+        # Output Layer 
         output_layer_betas = np.zeros(self.num_outputs)
         # TODO! Calculate output layer betas.
-        E_dout = None
-        deriv_out = None
+        E_dout = self.square_error(desired_outputs, output_layer_outputs)
+        deriv_out = self._derivative(output_layer_outputs[0])
         delta_out = E_dout * deriv_out
         output_layer_betas = delta_out
         print('OL betas: ', output_layer_betas)
 
+        # Hidden Layer 
         hidden_layer_betas = np.zeros(self.num_hidden)
         # TODO! Calculate hidden layer betas.
         E_hidden = np.dot(delta_out, self.output_layer_weights.T)
-        deriv_hidden = None
+        deriv_hidden = self._derivative(hidden_layer_outputs[0])
         delta_hidden = E_hidden * deriv_hidden
         hidden_layer_betas = delta_hidden
         print('HL betas: ', hidden_layer_betas)
@@ -72,16 +78,16 @@ class Neural_Network:
         # This is a HxO array (H hidden nodes, O outputs)
         delta_output_layer_weights = np.zeros((self.num_hidden, self.num_outputs))
         # TODO! Calculate output layer weight changes.
-        delta_H6_output_weights_ = np.dot(delta_out, np.array(hidden_layer_outputs[0]))
+        delta_H6_output_weights = np.dot(delta_out, np.array(hidden_layer_outputs[0]))
         delta_H6_output_weights = np.dot(delta_out, np.array(hidden_layer_outputs[1]))
-        delta_output_layer_weights = None
+        delta_output_layer_weights = np.array([delta_H6_output_weights[0], delta_H6_output_weights[0]])
 
         # This is a IxH array (I inputs, H hidden nodes)
         delta_hidden_layer_weights = np.zeros((self.num_inputs, self.num_hidden))
         # TODO! Calculate hidden layer weight changes.
-        delta_H5_weights = np.dot(delta_hidden[0], inputs.T)
-        delta_H6_weights = np.dot(delta_hidden[1], inputs.T)
-        delta_hidden_layer_weights = None 
+        delta_input_H5_weights = np.dot(delta_hidden[0][0], inputs.T)
+        delta_input_H6_weights = np.dot(delta_hidden[0][1], inputs.T)
+        delta_hidden_layer_weights = np.array([[x,y] for x,y in zip(delta_input_H5_weights,delta_input_H6_weights)])
         
 
         # Return the weights we calculated, so they can be used to update all the weights.
@@ -89,6 +95,8 @@ class Neural_Network:
 
     def update_weights(self, delta_output_layer_weights, delta_hidden_layer_weights):
         # TODO! Update the weights.
+        self.output_layer_weights += self.learning_rate * delta_output_layer_weights
+        self.hidden_layer_weights += self.learning_rate * delta_hidden_layer_weights
         print('Placeholder')
 
     def train(self, instances, desired_outputs, epochs):
