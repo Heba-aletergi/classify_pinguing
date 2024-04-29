@@ -60,13 +60,14 @@ if __name__ == '__main__':
 
     # TODO: Perform a single backpropagation pass using the first instance only. (In other words, train with 1
     #  instance for 1 epoch!). Hint: you will need to first get the weights from a forward pass.
-    nn.train(instances[0:3], onehot_encoded[0], 1)
-    
+    nn.train(instances[0:1], onehot_encoded[0], 1)
+
     print('Weights after performing BP for first instance only:')
     print('Hidden layer weights:\n', nn.hidden_layer_weights)
     print('Output layer weights:\n', nn.output_layer_weights)
 
     # TODO: Train for 100 epochs, on all instances.
+    nn.train(instances, onehot_encoded, 20)
     print('\nAfter training:')
     print('Hidden layer weights:\n', nn.hidden_layer_weights)
     print('Output layer weights:\n', nn.output_layer_weights)

@@ -37,8 +37,8 @@ class Neural_Network:
         hidden_layer_outputs = []
         for i in range(self.num_hidden):
             # TODO! Calculate the weighted sum, and then compute the final output.
-            weighted_sum = np.dot(inputs, self.hidden_layer_weights[:][:,i])  # Calculate weight summation
-            output = self.Actication_Func(weighted_sum)    #  Calculate Activation function for hidden
+            weighted_sum = np.dot(inputs, self.hidden_layer_weights[:,i]) 
+            output = self.Actication_Func(weighted_sum)    
             hidden_layer_outputs.append(output)
 
         # OUTPUT LAYER 
@@ -46,7 +46,7 @@ class Neural_Network:
         temp_output = []
         for i in range(self.num_outputs):
             # TODO! Calculate the weighted sum, and then compute the final output.  
-            weighted_sum = np.dot(hidden_layer_outputs, self.output_layer_weights[:][:,i]) #  Claculate weight summ
+            weighted_sum = np.dot(hidden_layer_outputs, self.output_layer_weights[:,i]) 
                # Calculate Activation function
             temp_output.append(weighted_sum)  
         softmax_out = self.softmax(np.array(temp_output))
@@ -60,7 +60,7 @@ class Neural_Network:
         # Output Layer 
         output_layer_betas = np.zeros(self.num_outputs)
         # TODO! Calculate output layer betas.
-        E_dout = self.square_error(desired_outputs, output_layer_outputs)
+        E_dout = self.square_error(desired_outputs, output_layer_outputs[0])
         deriv_out = self._derivative(output_layer_outputs[0])
         delta_out = E_dout * deriv_out
         output_layer_betas = delta_out
@@ -104,11 +104,15 @@ class Neural_Network:
         for epoch in range(epochs):
             print('epoch = ', epoch)
             predictions = []
+            correct_predictions = 0
             for i, instance in enumerate(instances):
                 hidden_layer_outputs, output_layer_outputs = self.forward_pass(instance)
                 delta_output_layer_weights, delta_hidden_layer_weights, = self.backward_propagate_error(
                     instance, hidden_layer_outputs, output_layer_outputs, desired_outputs[i])
-                predicted_class = None  # TODO!
+                predicted_class = np.argmax(output_layer_outputs[0])  # TODO!
+                # Check if prediction correct or not 
+                if predicted_class == np.argmax(desired_outputs[i]):
+                    correct_predictions += 1
                 predictions.append(predicted_class)
 
                 # We use online learning, i.e. update the weights after every instance.
@@ -119,7 +123,7 @@ class Neural_Network:
             print('Output layer weights  \n', self.output_layer_weights)
 
             # TODO: Print accuracy achieved over this epoch
-            acc = None
+            acc = correct_predictions / len(instances)
             print('acc = ', acc)
 
     def predict(self, instances):
@@ -127,6 +131,6 @@ class Neural_Network:
         for instance in instances:
             hidden_layer_outputs, output_layer_outputs = self.forward_pass(instance)
             #print(output_layer_outputs)
-            predicted_class = np.argmax(output_layer_outputs)  # TODO! Should be 0, 1, or 2.
+            predicted_class = np.argmax(output_layer_outputs[0])  # TODO! Should be 0, 1, or 2.
             predictions.append(predicted_class)
         return predictions
