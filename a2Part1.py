@@ -67,10 +67,11 @@ if __name__ == '__main__':
     print('Output layer weights:\n', nn.output_layer_weights)
 
     # TODO: Train for 100 epochs, on all instances.
-    nn.train(instances, onehot_encoded, 20)
+    nn.train(instances, onehot_encoded, 10)
     print('\nAfter training:')
     print('Hidden layer weights:\n', nn.hidden_layer_weights)
     print('Output layer weights:\n', nn.output_layer_weights)
+
 
     pd_data_ts = pd.read_csv('penguins307-test.csv')
     test_labels = pd_data_ts.iloc[:, -1]
@@ -79,3 +80,13 @@ if __name__ == '__main__':
     test_instances = scaler.transform(test_instances)
 
     # TODO: Compute and print the test accuracy
+    tes_label_encoder, test_integer_encoded, test_onehot_encoder, test_onehot_encoded = encode_labels(test_labels)
+    test_predict = nn.predict(test_instances)
+    
+    test_correct_predictions = 0
+    for predicted_label, actual_label in zip(test_predict, test_onehot_encoded):
+        if np.array_equal(predicted_label, actual_label):
+            test_correct_predictions += 1
+
+    test_accuracy = test_correct_predictions / len(test_instances)
+    print('Test Accuracy:', test_accuracy)
