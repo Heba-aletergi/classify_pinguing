@@ -46,7 +46,7 @@ if __name__ == '__main__':
     n_in = 4
     n_hidden = 2
     n_out = 3
-    learning_rate = 0.5
+    learning_rate = 0.2
 
     initial_hidden_layer_weights = np.array([[-0.28, -0.22], [0.08, 0.20], [-0.30, 0.32], [0.10, 0.01]])
     initial_output_layer_weights = np.array([[-0.29, 0.03, 0.21], [0.08, 0.13, -0.36]])
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     print('Output layer weights:\n', nn.output_layer_weights)
 
     # TODO: Train for 100 epochs, on all instances.
-    nn.train(instances, onehot_encoded, 10)
+    nn.train(instances, onehot_encoded, 5)
     print('\nAfter training:')
     print('Hidden layer weights:\n', nn.hidden_layer_weights)
     print('Output layer weights:\n', nn.output_layer_weights)
@@ -90,8 +90,9 @@ if __name__ == '__main__':
     # TODO: Compute and print the test accuracy
     # Perform prediction on test data 
     tes_label_encoder, test_integer_encoded, test_onehot_encoder, test_onehot_encoded = encode_labels(test_labels)
-    test_predict = nn.predict(test_instances)
+    predictions = nn.predict(test_instances)
     
     # Calculate the accuracy
-    test_accuracy = accuracy(test_predict, test_onehot_encoded, len(test_instances))
-    print('Test Accuracy:', test_accuracy)
+    predictions_class = onehot_encoder.transform(np.array(predictions).reshape(-1, 1))  # convert interget predicted into one hot code class
+    acc_test = accuracy(predictions_class, test_onehot_encoded , len(test_instances))
+    print("The Accuracy on test data is: {:.2f} %".format(acc_test*100))

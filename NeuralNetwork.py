@@ -97,7 +97,7 @@ class Neural_Network:
         # TODO! Update the weights.
         self.output_layer_weights += self.learning_rate * delta_output_layer_weights
         self.hidden_layer_weights += self.learning_rate * delta_hidden_layer_weights
-        print('Placeholder')
+        #print('Placeholder')
 
     def train(self, instances, desired_outputs, epochs):
 
@@ -124,7 +124,8 @@ class Neural_Network:
 
             # TODO: Print accuracy achieved over this epoch
             acc = correct_predictions / len(instances)
-            print('acc = ', acc)
+            print("The Accuracy is: {:.2f} %".format(acc*100))
+            
 
     def predict(self, instances):
         predictions = []
