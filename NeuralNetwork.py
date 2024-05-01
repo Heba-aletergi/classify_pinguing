@@ -3,7 +3,7 @@ import numpy as np
 
 class Neural_Network:
     # Initialize the network
-    def __init__(self, num_inputs, num_hidden, num_outputs, hidden_layer_weights, output_layer_weights, learning_rate, hidden_bias_weights=[0,0], output_bias_weights=[0,0,0]):
+    def __init__(self, num_inputs, num_hidden, num_outputs, hidden_layer_weights, output_layer_weights, learning_rate, output_bias_weights=[0,0,0], hidden_bias_weights=[0,0]):
         self.num_inputs = num_inputs
         self.num_hidden = num_hidden
         self.num_outputs = num_outputs
@@ -40,7 +40,7 @@ class Neural_Network:
         hidden_layer_outputs = []
         for i in range(self.num_hidden):
             # TODO! Calculate the weighted sum, and then compute the final output.
-            weighted_sum = np.dot(inputs, self.hidden_layer_weights[:,i]) 
+            weighted_sum = np.dot(inputs, self.hidden_layer_weights[:,i]) + self.hidden_bias[0][i]
             output = self.Actication_Func(weighted_sum)    
             hidden_layer_outputs.append(output)
 
@@ -49,7 +49,7 @@ class Neural_Network:
         temp_output = []
         for i in range(self.num_outputs):
             # TODO! Calculate the weighted sum, and then compute the final output.  
-            weighted_sum = np.dot(np.array(hidden_layer_outputs), self.output_layer_weights[:,i]) 
+            weighted_sum = np.dot(np.array(hidden_layer_outputs), self.output_layer_weights[:,i]) + self.output_bias[0][i]
             temp_output.append(weighted_sum)  
         softmax_out = self.softmax(np.array(temp_output))
         output_layer_outputs.append(softmax_out)
@@ -91,14 +91,20 @@ class Neural_Network:
         delta_input_H6_weights = np.dot(inputs.T, np.array(delta_hidden[1]))
         delta_hidden_layer_weights = np.array([[x,y] for x,y in zip(delta_input_H5_weights,delta_input_H6_weights)])
 
-        # Return the weights we calculated, so they can be used to update all the weights.
-        return delta_output_layer_weights, delta_hidden_layer_weights
+        # Bias for hidden and output layer
+        delta_output_bias_weights = delta_out
+        delta_hidden_bias_weights = delta_hidden
 
-    def update_weights(self, delta_output_layer_weights, delta_hidden_layer_weights):
+        # Return the weights we calculated, so they can be used to update all the weights.
+        return delta_output_layer_weights, delta_hidden_layer_weights, delta_output_bias_weights, delta_hidden_bias_weights
+
+    def update_weights(self, delta_output_layer_weights, delta_hidden_layer_weights, delta_output_bias, delta_hidden_bias):
         # TODO! Update the weights.
-        self.output_layer_weights -= self.learning_rate * delta_output_layer_weights
-        self.hidden_layer_weights -= self.learning_rate * delta_hidden_layer_weights
+        self.output_layer_weights += self.learning_rate * delta_output_layer_weights
+        self.hidden_layer_weights += self.learning_rate * delta_hidden_layer_weights
         #print('Placeholder')
+        self.output_bias -= self.learning_rate * delta_output_bias
+        self.hidden_bias -= self.learning_rate * delta_hidden_bias
 
     def train(self, instances, desired_outputs, epochs):
 
@@ -109,7 +115,7 @@ class Neural_Network:
             for i, instance in enumerate(instances):
                 desired_y = [desired_outputs if len(desired_outputs.shape) == 1 else desired_outputs[i]]
                 hidden_layer_outputs, output_layer_outputs = self.forward_pass(instance)
-                delta_output_layer_weights, delta_hidden_layer_weights, = self.backward_propagate_error(
+                delta_output_layer_weights, delta_hidden_layer_weights, delta_output_bias, delta_hidden_bias = self.backward_propagate_error(
                     instance, hidden_layer_outputs, output_layer_outputs, desired_y)
                 predicted_class = np.argmax(output_layer_outputs[0]) 
                 # Check if prediction correct or not 
@@ -119,7 +125,7 @@ class Neural_Network:
                 predictions.append(predicted_class)
 
                 # We use online learning, i.e. update the weights after every instance.
-                self.update_weights(delta_output_layer_weights, delta_hidden_layer_weights)
+                self.update_weights(delta_output_layer_weights, delta_hidden_layer_weights, delta_output_bias, delta_hidden_bias)
 
             # Print new weights
             print('Hidden layer weights \n', self.hidden_layer_weights)

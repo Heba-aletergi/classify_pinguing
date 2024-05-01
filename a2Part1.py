@@ -54,7 +54,7 @@ if __name__ == '__main__':
     initial_output_bias = np.array([[-0.33, 0.26, 0.06]])
 
     nn = Neural_Network(n_in, n_hidden, n_out, initial_hidden_layer_weights, initial_output_layer_weights,
-                        learning_rate)
+                        learning_rate, initial_output_bias, initial_hidden_bias)
 
     print('First instance has label {}, which is {} as an integer, and {} as a list of outputs.\n'.format(
         labels[0], integer_encoded[0], onehot_encoded[0]))
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     print('Output layer weights:\n', nn.output_layer_weights)
 
     # TODO: Train for 100 epochs, on all instances.
-    nn.train(instances, onehot_encoded, 50)
+    nn.train(instances, onehot_encoded, 10)
     print('\nAfter training:')
     print('Hidden layer weights:\n', nn.hidden_layer_weights)
     print('Output layer weights:\n', nn.output_layer_weights)
